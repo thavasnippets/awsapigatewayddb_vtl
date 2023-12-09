@@ -8,7 +8,7 @@ TABLE_NAME="ddb_usr_dtls"
 for ((i=1; i<=1000; i++))
 do
   # Generate a unique identifier for each row
-  ID=$(uuidgen)
+  ID="$i"
 
   # Generate random data for other attributes (modify as needed)
   FIRST_NAME="FirstName$i"

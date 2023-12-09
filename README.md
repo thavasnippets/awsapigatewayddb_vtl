@@ -3,7 +3,6 @@ In this approach involves a direct integration between API Gateway and DynamoDB,
 
 ### 1. Create DynamoDB Table:
 
-
 Lets Create Dynamodb Table with as below
 * ddb_usr_dtls is the table name
 * phoneNumber is the partition key (HASH).
@@ -24,14 +23,7 @@ aws dynamodb create-table \
     --provisioned-throughput \
         ReadCapacityUnits=5,WriteCapacityUnits=5 \
     --global-secondary-indexes \
-        IndexName=NameIndex \
-        --key-schema \
-            AttributeName=firstName,KeyType=HASH \
-            AttributeName=lastName,KeyType=RANGE \
-        --projection \
-            ProjectionType=ALL \
-        --provisioned-throughput \
-            ReadCapacityUnits=5,WriteCapacityUnits=5
+        "IndexName=NameIndex,KeySchema=[{AttributeName=firstName,KeyType=HASH},{AttributeName=lastName,KeyType=RANGE}],Projection={ProjectionType=ALL},ProvisionedThroughput={ReadCapacityUnits=5,WriteCapacityUnits=5}"
 
 ```
 Create a DynamoDB table with a primary key (e.g., "userId").
@@ -130,39 +122,18 @@ For each method in API Gateway, define mapping templates to transform incoming r
 ```
 #### Search by GSI
 
-GET /users <br>
-GET /users?firstName=Thava <br>
-GET /users?lastName=Sam <br>
 GET /users?firstName=Arun&lastName=Kumar <br>
 
 ```VTL
 #set($inputRoot = $input.path('$'))
-
-#set($expressionAttributeValues = {})
-#set($keyConditionExpression = "")
-
-#if($input.params('firstName'))
-  #set($expressionAttributeValues.firstName = {
-    "S": "$input.params('firstName')"
-  })
-  #set($keyConditionExpression = "firstName = :firstName")
-#end
-
-#if($input.params('lastName'))
-  #if($keyConditionExpression.length() > 0)
-    #set($keyConditionExpression = "$keyConditionExpression AND ")
-  #end
-  #set($expressionAttributeValues.lastName = {
-    "S": "$input.params('lastName')"
-  })
-  #set($keyConditionExpression = "$keyConditionExpression lastName = :lastName")
-#end
-
 {
   "TableName": "ddb_usr_dtls",
   "IndexName": "NameIndex",
-  "KeyConditionExpression": "$keyConditionExpression",
-  "ExpressionAttributeValues": $util.toJson($expressionAttributeValues)
+  "KeyConditionExpression": "firstName = :firstName AND lastName = :lastName",
+  "ExpressionAttributeValues": {
+    ":firstName":{"S": "$input.params('firstName')"},
+    ":lastName":{"S": "$input.params('lastName')"}
+  }
 }
 
 ```
@@ -178,8 +149,8 @@ TABLE_NAME="ddb_usr_dtls"
 # Loop to insert 1000 rows
 for ((i=1; i<=1000; i++))
 do
-  # Generate a unique identifier for each row
-  ID=$(uuidgen)
+  
+  ID="$i"
 
   # Generate random data for other attributes (modify as needed)
   FIRST_NAME="FirstName$i"
