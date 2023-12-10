@@ -26,7 +26,7 @@ aws dynamodb create-table \
         "IndexName=NameIndex,KeySchema=[{AttributeName=firstName,KeyType=HASH},{AttributeName=lastName,KeyType=RANGE}],Projection={ProjectionType=ALL},ProvisionedThroughput={ReadCapacityUnits=5,WriteCapacityUnits=5}"
 
 ```
-Create a DynamoDB table with a primary key (e.g., "userId").
+
 
 ### 2.Set Up API Gateway:
 Create a new API in API Gateway and create a resource with method for each CRUD operation (GET, POST, PUT, DELETE).
@@ -138,7 +138,7 @@ GET /users?firstName=Arun&lastName=Kumar <br>
 
 ```
 
-To insert 1000 rows into a DynamoDB table using the AWS CLI, you can create a Bash script. The script will make use of the aws dynamodb put-item command to insert each row. Below is an example Bash script:
+To insert sample 1000 rows into a DynamoDB table using the AWS CLI, you can create a Bash script.
 ```bash
 #!/bin/bash
 
@@ -149,9 +149,7 @@ TABLE_NAME="ddb_usr_dtls"
 # Loop to insert 1000 rows
 for ((i=1; i<=1000; i++))
 do
-  
-  ID="$i"
-
+ 
   # Generate random data for other attributes (modify as needed)
   FIRST_NAME="FirstName$i"
   LAST_NAME="LastName$i"
@@ -164,7 +162,6 @@ do
     --table-name $TABLE_NAME \
     --item \
       '{
-        "id": {"S": "'$ID'"},
         "firstName": {"S": "'$FIRST_NAME'"},
         "lastName": {"S": "'$LAST_NAME'"},
         "email": {"S": "'$EMAIL'"},
